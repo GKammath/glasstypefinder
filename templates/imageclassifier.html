@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classifier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            width: 300px;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        img {
+            max-width: 100%;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Image Classifier</h2>
+        <input type="file" accept="image/*" id="imageUpload">
+        <img id="imagePreview" alt="Image Preview">
+        <button onclick="predictImage()">Predict</button>
+    </div>
+
+    <!-- TensorFlow.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <!-- TensorFlow.js model -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+
+    <script>
+        let model;
+
+        // Load the TensorFlow.js model
+        async function loadModel() {
+            model = await mobilenet.load();
+        }
+
+        // Handle image upload and preview
+        document.getElementById('imageUpload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Predict the image class
+        async function predictImage() {
+            const imageElement = document.getElementById('imagePreview');
+            if (imageElement.src) {
+                const predictions = await model.classify(imageElement);
+                alert(`Prediction: ${predictions[0].className}\nProbability: ${(predictions[0].probability * 100).toFixed(2)}%`);
+            } else {
+                alert('Please upload an image first.');
+            }
+        }
+
+        // Load the model on page load
+        window.onload = loadModel;
+    </script>
+</body>
+</html>
